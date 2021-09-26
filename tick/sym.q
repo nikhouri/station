@@ -1,0 +1,1 @@
+obs:([]time:`timespan$();sym:`$();units:`$();data:`float$());
