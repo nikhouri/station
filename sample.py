@@ -6,7 +6,7 @@ from smbus2 import SMBus
 from bme280 import BME280
 from mics6814 import MICS6814
 
-LOOPSECS = 5
+LOOPSECS = 30
 TRANSMITSECS = 5
 STASHSAVESECS = 120
 
@@ -34,10 +34,12 @@ def upd(meas):
 
 if __name__ == '__main__':
 
-    # Initialise the BME280 & MICS6814 breakouts
+    # Initialise the BME280 & MICS6814 breakouts, disable LEDs
     bus = SMBus(1)
     bme280 = BME280(i2c_dev=bus)
     gas = MICS6814()
+    gas.set_brightness(0.0)
+    gas.set_led(0, 0, 0)
 
     # Load any saved stashed values
 
@@ -51,7 +53,7 @@ if __name__ == '__main__':
         STASH.append([ts(),'`oxidising','`Ohms',gas.read_oxidising()])
         STASH.append([ts(),'`reducing','`Ohms',gas.read_reducing()])
         STASH.append([ts(),'`nh3','`Ohms',gas.read_nh3()])
-        print(str(STASH[-6:]))
+        #print(str(STASH[-6:]))
 
         # Try to transmit stashed data (and SOME of the last updates -
         #    so ex. generate 6 every time, try to send 30)
