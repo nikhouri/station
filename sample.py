@@ -5,6 +5,7 @@ from datetime import datetime
 from smbus2 import SMBus
 from bme280 import BME280
 from mics6814 import MICS6814
+import psutil
 
 LOOPSECS = 30
 TRANSMITSECS = 5
@@ -53,7 +54,10 @@ if __name__ == '__main__':
         STASH.append([ts(),'`oxidising','`Ohms',gas.read_oxidising()])
         STASH.append([ts(),'`reducing','`Ohms',gas.read_reducing()])
         STASH.append([ts(),'`nh3','`Ohms',gas.read_nh3()])
-        #print(str(STASH[-6:]))
+        STASH.append([ts(),'`cpu','`pct',psutil.cpu_percent(percpu = True)])
+        STASH.append([ts(),'`cputemp','`pct',psutil.sensors_temperatures()['cpu_thermal'][0].current])
+        STASH.append([ts(),'`mem','`pct',psutil.virtual_memory().percent])
+        #print(str(STASH[-9:]))
 
         # Try to transmit stashed data (and SOME of the last updates -
         #    so ex. generate 6 every time, try to send 30)
