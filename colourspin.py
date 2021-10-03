@@ -7,11 +7,12 @@ import colorsys
 from mics6814 import MICS6814
 
 DELAY = 0 # The chip itself is slow to update
+SPINS = 2
 
 mics = MICS6814()
 mics.set_brightness(1)
 
-for x in range(0,360):
+for x in range(0,360*SPINS):
   r,g,b = [int(c*255) for c in colorsys.hsv_to_rgb(x/360,1,1)]
   #print(str(x) + '* R:' + str(r) + ' G:' + str(g) + ' B:' + str(b))
   mics.set_led(r,g,b)
