@@ -1,3 +1,5 @@
 tick/sym*.*.*
 tick/sym/**
 nohup.out
+\#*\#
+.\#*
