@@ -12,7 +12,7 @@ mics = MICS6814()
 mics.set_brightness(1)
 
 for x in range(0,360):
-  r,g,b = [int(c*255) for c in colorsys.hsv_to_rgb(x/360,0.75,1)]
+  r,g,b = [int(c*255) for c in colorsys.hsv_to_rgb(x/360,1,1)]
   #print(str(x) + '* R:' + str(r) + ' G:' + str(g) + ' B:' + str(b))
   mics.set_led(r,g,b)
   time.sleep(DELAY)
