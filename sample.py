@@ -1,18 +1,21 @@
 #!/usr/bin/env python3
 import time
 import requests
+import socket
+import psutil
 from datetime import datetime
 from smbus2 import SMBus
 from bme280 import BME280
 from mics6814 import MICS6814
-import psutil
+
 
 LOOPSECS = 30
 TRANSMITSECS = 5
 STASHSAVESECS = 120
 
+HOST = socket.gethostname()
 PROTO = 'http://'
-HOST = '192.168.0.12'
+DBHOST = '192.168.0.12'
 PORT = ':5010'
 PATH = '/?'
 
@@ -28,7 +31,7 @@ def upd(meas):
     query = '.u.upd[`obs;(' + str(mts) + ';' + str(mtype) + ';' + str(munit) + \
         ';' + str(measure) + ')]'
     try:
-        r = requests.get(PROTO + HOST + PORT + PATH + query)
+        r = requests.get(PROTO + DBHOST + PORT + PATH + query)
         return r.status_code
     except Exception:
         return -1
@@ -48,15 +51,15 @@ if __name__ == '__main__':
     while True:
 
         # Take measurements & stash them - make these strings??
-        STASH.append([ts(),'`temperature','`C',bme280.get_temperature()])
-        STASH.append([ts(),'`pressure','`hPa',bme280.get_pressure()])
-        STASH.append([ts(),'`humidity','`pct',bme280.get_humidity()])
-        STASH.append([ts(),'`oxidising','`Ohms',gas.read_oxidising()])
-        STASH.append([ts(),'`reducing','`Ohms',gas.read_reducing()])
-        STASH.append([ts(),'`nh3','`Ohms',gas.read_nh3()])
-        STASH.append([ts(),'`cpu','`pct',psutil.cpu_percent(percpu = True)])
-        STASH.append([ts(),'`cputemp','`C',psutil.sensors_temperatures()['cpu_thermal'][0].current])
-        STASH.append([ts(),'`mem','`pct',psutil.virtual_memory().percent])
+        STASH.append([ts(),HOST,'`temperature','`C',bme280.get_temperature()])
+        STASH.append([ts(),HOST,'`pressure','`hPa',bme280.get_pressure()])
+        STASH.append([ts(),HOST,'`humidity','`pct',bme280.get_humidity()])
+        STASH.append([ts(),HOST,'`oxidising','`Ohms',gas.read_oxidising()])
+        STASH.append([ts(),HOST,'`reducing','`Ohms',gas.read_reducing()])
+        STASH.append([ts(),HOST,'`nh3','`Ohms',gas.read_nh3()])
+        STASH.append([ts(),HOST,'`cpu','`pct',psutil.cpu_percent(percpu = True)])
+        STASH.append([ts(),HOST,'`cputemp','`C',psutil.sensors_temperatures()['cpu_thermal'][0].current])
+        STASH.append([ts(),HOST,'`mem','`pct',psutil.virtual_memory().percent])
         #print(str(STASH[-9:]))
 
         # Try to transmit stashed data (and SOME of the last updates -

@@ -1,1 +1,1 @@
-obs:([]time:`timespan$();sym:`$();units:`$();data:`float$());
+obs:([]time:`timespan$();host:`$();sym:`$();units:`$();data:`float$());
