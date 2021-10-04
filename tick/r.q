@@ -1,0 +1,1 @@
+/home/nik/q/tick/r.q
