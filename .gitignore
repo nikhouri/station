@@ -1,5 +1,5 @@
-tick/sym*.*.*
-tick/sym/**
+tick/db*.*.*
+tick/db/**
 nohup.out
 \#*\#
 .\#*
