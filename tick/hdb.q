@@ -1,4 +1,5 @@
 / From https://code.kx.com/q/wp/rt-tick/
+\o 0
 
 /Sample usage:
 /q hdb.q C:/OnDiskDB/sym -p 5002
