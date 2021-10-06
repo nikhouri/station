@@ -34,7 +34,7 @@ ggplot(df) +
     # Plot labels
     labs(title="CPU Temperature by host",
          x=NULL, y="°C",
-         subtitle = "Last 7 days, 10 minute medians",
+         subtitle = "In °C for the last 7 days, 10 minute interval medians",
          caption="Source: observatory db",
          color=NULL) +
     # Themeing & fonts
