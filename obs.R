@@ -2,14 +2,14 @@
 library(ggplot2)
 
 # RDB query
-url <- 'http://192.168.0.12:5011/.csv?'
+url <- 'http://localhost:5011/.csv?'
 query <- 'select med data by 10 xbar time.minute,host,sym from obs'
 uquery <- URLencode(query)
 dfr <- read.csv(paste0(url,uquery),stringsAsFactors=FALSE)
 dfr$time = as.POSIXct(dfr$minute,format='%H:%M',tz='UTC')
 
 # HDB query
-url <- 'http://192.168.0.12:5012/.csv?'
+url <- 'http://localhost:5012/.csv?'
 query <- 'select med data by date,10 xbar time.minute,host,sym from obs where date>.z.d-7'
 uquery <- URLencode(query)
 dfh <- read.csv(paste0(url,uquery),stringsAsFactors=FALSE)
