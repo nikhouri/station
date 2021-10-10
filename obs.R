@@ -5,18 +5,18 @@ library(ggplot2)
 url <- 'http://192.168.0.12:5011/.csv?'
 query <- 'select med data by 10 xbar time.minute,host,sym from obs'
 uquery <- URLencode(query)
-df <- read.csv(paste0(url,uquery),stringsAsFactors=FALSE)
-df$time = as.POSIXct(df$minute,format='%H:%M',tz='UTC')
+dfr <- read.csv(paste0(url,uquery),stringsAsFactors=FALSE)
+dfr$time = as.POSIXct(dfr$minute,format='%H:%M',tz='UTC')
 
 # HDB query
 url <- 'http://192.168.0.12:5012/.csv?'
 query <- 'select med data by date,10 xbar time.minute,host,sym from obs where date>.z.d-7'
 uquery <- URLencode(query)
-df <- read.csv(paste0(url,uquery),stringsAsFactors=FALSE)
-df$time = as.POSIXct(paste0(df$date,"T",df$minute),format='%FT%H:%M',tz='UTC')
+dfh <- read.csv(paste0(url,uquery),stringsAsFactors=FALSE)
+dfh$time = as.POSIXct(paste0(dfh$date,"T",dfh$minute),format='%FT%H:%M',tz='UTC')
 
 # Quick plot of the rdb time series
-qplot(data=df[df$sym=='temperature'],x=time,y=data,color=sym,geom="line")
+qplot(data=dfr[dfr$sym=='temperature',],x=time,y=data,color=sym,geom="line")
 
 # Quick plot of the hdb time series
 qplot(data=dfh[dfh$sym=='cputemp',],x=time,y=data,color=host,geom="line")
