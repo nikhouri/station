@@ -1,0 +1,124 @@
+---
+title: "Emmer Green Observatory"
+author: "nik@nikhouri.com"
+output:
+  html_document:
+    fig_width: 10
+    fig_height: 4
+    toc: TRUE
+---
+
+# Latest
+```{r, echo=FALSE, message=FALSE, warning=FALSE, error=FALSE, }
+library(knitr)
+
+# RDB query
+url <- 'http://localhost:5011/.csv?'
+query <- 'select last time, last data by host,sym,units from obs where host=`garden'
+uquery <- URLencode(query)
+dfn <- read.csv(paste0(url,uquery),stringsAsFactors=FALSE)
+dfn$time = as.POSIXct(dfn$time,format='%H:%M',tz='UTC')
+
+knitr::kable(dfn,row.names=TRUE)
+```
+
+# Today
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE, error=FALSE, }
+library(ggplot2)
+
+# RDB query
+url <- 'http://localhost:5011/.csv?'
+query <- 'select med data by 10 xbar time.minute,host,sym from obs'
+uquery <- URLencode(query)
+dfr <- read.csv(paste0(url,uquery),stringsAsFactors=FALSE)
+dfr$time = as.POSIXct(dfr$minute,format='%H:%M',tz='UTC')
+
+# Tol Vibrant colour map
+tolvibrant <- c("#EE3377", "#EE7733", "#0077BB", "#009988", "#33BBEE", "#CC3311", "#BBBBBB")
+
+# Number format function
+numfmt <- function(x) format(x, big.mark=" ", decimal.mark=".", scientific=FALSE)
+
+# Temperature chart
+ggplot(dfr[dfr$sym=='temperature',]) +
+  # Data series
+  geom_line(aes(x=time,y=data,color=host), size=1) + # color=host
+  # Axis scales and colour scales
+  scale_y_continuous(label=numfmt) +
+  scale_color_discrete(type=tolvibrant) +
+  # Plot labels
+  labs(title="Air Temperature",
+       x=NULL, y="°C",
+       subtitle = "In °C for today, 10 minute medians",
+       caption="Source: observatory db",
+       color=NULL) +
+  # Themeing & fonts
+  theme_light() +
+  theme(legend.position="hidden",
+        text=element_text(size=15, family="Fira Sans Extra Condensed"),
+        plot.title=element_text(family="Fira Sans Extra Condensed Medium"),
+        plot.caption=element_text(color="#666666"))
+
+# Humidity chart
+ggplot(dfr[dfr$sym=='humidity',]) +
+  # Data series
+  geom_line(aes(x=time,y=data,color=host), size=1) + # color=host
+  # Axis scales and colour scales
+  scale_y_continuous(label=numfmt) +
+  scale_color_discrete(type=tolvibrant) +
+  # Plot labels
+  labs(title="Humidity",
+       x=NULL, y="Percent",
+       subtitle = "In percent for today, 10 minute medians",
+       caption="Source: observatory db",
+       color=NULL) +
+  # Themeing & fonts
+  theme_light() +
+  theme(legend.position="hidden",
+        text=element_text(size=15, family="Fira Sans Extra Condensed"),
+        plot.title=element_text(family="Fira Sans Extra Condensed Medium"),
+        plot.caption=element_text(color="#666666"))
+
+# Air pressure chart
+ggplot(dfr[dfr$sym=='pressure',]) +
+  # Data series
+  geom_line(aes(x=time,y=data,color=host), size=1) + # color=host
+  # Axis scales and colour scales
+  scale_y_continuous(label=numfmt) +
+  scale_color_discrete(type=tolvibrant) +
+  # Plot labels
+  labs(title="Air Pressure",
+       x=NULL, y="hPa",
+       subtitle = "In hPa for today, 10 minute medians",
+       caption="Source: observatory db",
+       color=NULL) +
+  # Themeing & fonts
+  theme_light() +
+  theme(legend.position="hidden",
+        text=element_text(size=15, family="Fira Sans Extra Condensed"),
+        plot.title=element_text(family="Fira Sans Extra Condensed Medium"),
+        plot.caption=element_text(color="#666666"))
+```
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE, error=FALSE, fig.width=10, fig.height=6}
+ggplot(dfr[dfr$sym %in% c('cpu','cputemp','mem'),]) +
+  # Data series
+  geom_smooth(aes(x=time,y=data,color=sym,fill=sym), size=1) +
+  # Axis scales and colour scales
+  scale_y_continuous(label=numfmt)+
+  scale_color_discrete(type=tolvibrant) +
+  scale_fill_discrete(type=tolvibrant) +
+  # Plot labels
+  labs(title="Observatory Diagnostics",
+       x=NULL, y="CPU %, Mem %, CPU °C",
+       subtitle = "In hPa for today, 10 minute medians",
+       caption="Source: observatory db",
+       color=NULL,fill=NULL) +
+  # Themeing & fonts
+  theme_light() +
+  theme(legend.position="top",
+        text=element_text(size=15, family="Fira Sans Extra Condensed"),
+        plot.title=element_text(family="Fira Sans Extra Condensed Medium"),
+        plot.caption=element_text(color="#666666"))
+```
