@@ -17,7 +17,7 @@ url <- 'http://localhost:5011/.csv?'
 query <- 'select last time, last data by host,sym,units from obs where host=`garden'
 uquery <- URLencode(query)
 dfn <- read.csv(paste0(url,uquery),stringsAsFactors=FALSE)
-dfn$time = as.POSIXct(dfn$time,format='%H:%M',tz='UTC')
+dfn$time = as.POSIXct(dfn$time,format='0D%H:%M:%S',tz='UTC')
 
 knitr::kable(dfn,row.names=TRUE)
 ```
