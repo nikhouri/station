@@ -9,18 +9,26 @@ output:
 ---
 Generated `r Sys.time()`
 
-# Summary
+# Today's Summary
 ```{r, echo=FALSE, message=FALSE, warning=FALSE, error=FALSE, }
 library(knitr)
 
+# Number format function
+numfmt <- function(x) format(x, big.mark="\U00A0", decimal.mark=".", scientific=FALSE)
+
 # RDB query
 url <- 'http://localhost:5011/.csv?'
-query <- 'pctile:{ y (100 xrank y:asc y) bin x}; select last time, now:last data, low:pctile[5;data], median:med data, high:pctile[95;data] by host,sym,units from obs where host=`garden'
+query <- 'pctile:{ y (100 xrank y:asc y) bin x}; select last time, now:last data, low:pctile[5;data], median:med data, high:pctile[95;data] by sym,units from obs where host=`garden'
 uquery <- URLencode(query)
 dfn <- read.csv(paste0(url,uquery),stringsAsFactors=FALSE)
+dfn$now <- numfmt(round(dfn$now,1))
+dfn$low <- numfmt(round(dfn$low,1))
+dfn$median <- numfmt(round(dfn$median,1))
+dfn$high <- numfmt(round(dfn$high,1))
 dfn$time = as.POSIXct(dfn$time,format='0D%H:%M:%S',tz='UTC')
+colnames(dfn) <- c("Variable","Units","Timestamp","Last","Min (5th%)","Median","Max (95th%)")
 
-knitr::kable(dfn,row.names=TRUE)
+knitr::kable(dfn)
 ```
 
 # Today's Charts
@@ -38,9 +46,6 @@ dfr$time = as.POSIXct(dfr$minute,format='%H:%M',tz='UTC')
 # Tol Vibrant colour map
 tolvibrant <- c("#EE3377", "#EE7733", "#0077BB", "#009988", "#33BBEE", "#CC3311", "#BBBBBB")
 
-# Number format function
-numfmt <- function(x) format(x, big.mark=" ", decimal.mark=".", scientific=FALSE)
-
 # Temperature chart
 ggplot(dfr[dfr$sym=='temperature',]) +
   # Data series
@@ -54,7 +59,6 @@ ggplot(dfr[dfr$sym=='temperature',]) +
   labs(title="Air Temperature",
        x=NULL, y="°C",
        subtitle = "Today, 10 minute medians and 5th/95th percentiles",
-       caption="Source: observatory db",
        color=NULL) +
   # Themeing & fonts
   theme_light() +
@@ -76,7 +80,6 @@ ggplot(dfr[dfr$sym=='humidity',]) +
   labs(title="Humidity",
        x=NULL, y="Percent",
        subtitle = "Today, 10 minute medians and 5th/95th percentiles",
-       caption="Source: observatory db",
        color=NULL) +
   # Themeing & fonts
   theme_light() +
@@ -98,7 +101,6 @@ ggplot(dfr[dfr$sym=='pressure',]) +
   labs(title="Air Pressure",
        x=NULL, y="hPa",
        subtitle = "Today, 10 minute medians and 5th/95th percentiles",
-       caption="Source: observatory db",
        color=NULL) +
   # Themeing & fonts
   theme_light() +
@@ -118,10 +120,9 @@ ggplot(dfr[dfr$sym %in% c('cpu','cputemp','mem'),]) +
   scale_color_discrete(type=tolvibrant) +
   scale_fill_discrete(type=tolvibrant) +
   # Plot labels
-  labs(title="Observatory Diagnostics",
+  labs(title="Weather Station Diagnostics",
        x=NULL, y="CPU %, Mem %, CPU °C",
-       subtitle = "CPU %, Mem %, CPU °C",
-       caption="Source: observatory db",
+       subtitle = "Today, 10 minute medians and 5th/95th percentiles",
        color=NULL,fill=NULL) +
   # Themeing & fonts
   theme_light() +
