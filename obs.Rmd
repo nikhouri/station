@@ -7,6 +7,7 @@ output:
     fig_height: 4
     toc: TRUE
 ---
+Generated `r Sys.time()`
 
 # Latest
 ```{r, echo=FALSE, message=FALSE, warning=FALSE, error=FALSE, }
@@ -104,7 +105,7 @@ ggplot(dfr[dfr$sym=='pressure',]) +
 ```{r, echo=FALSE, message=FALSE, warning=FALSE, error=FALSE, fig.width=10, fig.height=6}
 ggplot(dfr[dfr$sym %in% c('cpu','cputemp','mem'),]) +
   # Data series
-  geom_smooth(aes(x=time,y=data,color=sym,fill=sym), size=1) +
+  geom_smooth(aes(x=time,y=data,color=sym,fill=sym), se=FALSE, size=1) +
   # Axis scales and colour scales
   scale_y_continuous(label=numfmt)+
   scale_color_discrete(type=tolvibrant) +
@@ -112,7 +113,7 @@ ggplot(dfr[dfr$sym %in% c('cpu','cputemp','mem'),]) +
   # Plot labels
   labs(title="Observatory Diagnostics",
        x=NULL, y="CPU %, Mem %, CPU °C",
-       subtitle = "In hPa for today, 10 minute medians",
+       subtitle = "CPU %, Mem %, CPU °C",
        caption="Source: observatory db",
        color=NULL,fill=NULL) +
   # Themeing & fonts
