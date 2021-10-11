@@ -1,25 +1,25 @@
 # Observatory 
-Python & kdb+tick environment logging.
+Python & kdb+tick environment logging. Summary is updated every 5 minutes to [https://o.nikhouri.com](https://o.nikhouri.com)
+
+![](temperature.png)
+
 ```
-q)select minv:min data, q1:pctile[25;data], medv:med data, q3:pctile[75;data], maxv:max data, rng:(max data - min data), iqr:(pctile[75;data]-pctile[25;data]) by host,sym,units from obs
-host   sym         units| minv     q1       medv     q3       maxv     rng      iqr       
-------------------------| ----------------------------------------------------------------
-garden cpu         pct  | 1.5      1.7      1.7      1.8      50.9     49.4     0.1       
-garden cputemp     C    | 29.324   29.324   29.324   29.862   31.476   2.152    0.538     
-garden humidity    pct  | 69.71942 69.78379 69.85477 69.92609 98.46316 28.74374 0.142307  
-garden mem         pct  | 23.2     23.3     23.3     23.3     23.3     0.1      0         
-garden nh3         Ohms | 103582.5 103804.9 104027.9 104139.7 104363.6 781.1729 334.7868  
-garden oxidising   Ohms | 183373.7 184125.7 184377.4 184629.6 185135.6 1761.951 503.9363  
-garden pressure    hPa  | 720.8314 999.2943 999.302  999.3293 999.3805 278.5491 0.03496887
-garden reducing    Ohms | 25031.8  25089.11 25132.14 25175.22 25261.52 229.7145 86.11233  
-garden temperature C    | 17.81613 17.82122 17.8252  17.83554 22.56575 4.749617 0.01432103
-rpi    cpu         pct  | 0        8.1      9.4      11.5     25.6     25.6     3.4       
-rpi    cputemp     C    | 48.686   49.173   49.4165  50.147   50.634   1.948    0.974     
-rpi    mem         pct  | 59.7     59.8     59.9     59.9     60.6     0.9      0.1
+q)select now:last data, lo:min data, median:med data, hi:max data by last time,host,sym,units from obs
+time                 host   sym         units| now      lo       median   hi      
+---------------------------------------------| -----------------------------------
+0D21:00:23.395481000 garden cpu         pct  | 9.4      1.2      2.7      67.1    
+0D21:00:23.395481000 garden cputemp     C    | 21.254   18.564   21.792   27.71   
+0D21:00:23.395481000 garden humidity    pct  | 82.43135 59.62178 78.23818 84.90719
+0D21:00:23.395481000 garden mem         pct  | 23.4     23.3     23.3     24.3    
+0D21:00:23.395481000 garden pressure    hPa  | 1022.278 1022.165 1023.204 1024.512
+0D21:00:23.395481000 garden temperature C    | 9.59528  7.507809 10.63044 15.02516
+0D21:00:23.395481000 rpi    cpu         pct  | 10.4     5.4      6.1      92.7    
+0D21:00:23.395481000 rpi    cputemp     C    | 46.251   41.381   44.303   54.53   
+0D21:00:23.395481000 rpi    mem         pct  | 55.2     49.2     50.5     58.7    
 ```
 
 # kdb+tick
-The kdb+tick deployment is a stock install, barring the addition of a UTC timezone change at the top of all scripts (`tick.q`, `r.q`, and `u.q`).
+The kdb+tick deployment is a stock install, barring the addition of a UTC timezone change at the top of all scripts (`tick.q`, `r.q`, and `u.q`). Necessary as the host doesn't run UTC.
 
 ```
 \o 0
@@ -34,3 +34,11 @@ The cron job to do this is:
 ```
 0 * * * * python3 /home/pi/observatory/colourspin.py
 ```
+
+# Hardware
+
+* Raspberry Pi Zero W
+* BME280 (Temperature, Humidity, Air Pressure)
+* MICS6814 (Oxidizing Gas, Reducing Gas, Ammonia) 
+
+![](observatory.jpg)
