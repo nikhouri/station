@@ -1,5 +1,5 @@
 ---
-title: "Emmer Green Observatory"
+title: "Emmer Green Weather Station"
 author: "nik@nikhouri.com"
 output:
   html_document:
@@ -9,13 +9,13 @@ output:
 ---
 Generated `r Sys.time()`
 
-# Latest
+# Summary
 ```{r, echo=FALSE, message=FALSE, warning=FALSE, error=FALSE, }
 library(knitr)
 
 # RDB query
 url <- 'http://localhost:5011/.csv?'
-query <- 'select last time, last data by host,sym,units from obs where host=`garden'
+query <- 'pctile:{ y (100 xrank y:asc y) bin x}; select last time, now:last data, low:pctile[5;data], median:med data, high:pctile[95;data] by host,sym,units from obs where host=`garden'
 uquery <- URLencode(query)
 dfn <- read.csv(paste0(url,uquery),stringsAsFactors=FALSE)
 dfn$time = as.POSIXct(dfn$time,format='0D%H:%M:%S',tz='UTC')
@@ -23,14 +23,14 @@ dfn$time = as.POSIXct(dfn$time,format='0D%H:%M:%S',tz='UTC')
 knitr::kable(dfn,row.names=TRUE)
 ```
 
-# Today
+# Today's Charts
 
 ```{r, echo=FALSE, message=FALSE, warning=FALSE, error=FALSE, }
 library(ggplot2)
 
 # RDB query
 url <- 'http://localhost:5011/.csv?'
-query <- 'select med data by 10 xbar time.minute,host,sym from obs'
+query <- 'pctile:{ y (100 xrank y:asc y) bin x}; select low:pctile[5;data], median:med data, high:pctile[95;data] by 10 xbar time.minute,sym from obs where host=`garden'
 uquery <- URLencode(query)
 dfr <- read.csv(paste0(url,uquery),stringsAsFactors=FALSE)
 dfr$time = as.POSIXct(dfr$minute,format='%H:%M',tz='UTC')
@@ -44,14 +44,16 @@ numfmt <- function(x) format(x, big.mark=" ", decimal.mark=".", scientific=FALSE
 # Temperature chart
 ggplot(dfr[dfr$sym=='temperature',]) +
   # Data series
-  geom_line(aes(x=time,y=data,color=host), size=1) + # color=host
+  geom_line(aes(x=time,y=median,color=sym), size=1) +
+  geom_ribbon(aes(x=time,ymin=low,ymax=high,fill=sym), alpha=0.2) + 
   # Axis scales and colour scales
   scale_y_continuous(label=numfmt) +
   scale_color_discrete(type=tolvibrant) +
+  scale_fill_discrete(type=tolvibrant) +
   # Plot labels
   labs(title="Air Temperature",
        x=NULL, y="°C",
-       subtitle = "In °C for today, 10 minute medians",
+       subtitle = "Today, 10 minute medians and 5th/95th percentiles",
        caption="Source: observatory db",
        color=NULL) +
   # Themeing & fonts
@@ -64,14 +66,16 @@ ggplot(dfr[dfr$sym=='temperature',]) +
 # Humidity chart
 ggplot(dfr[dfr$sym=='humidity',]) +
   # Data series
-  geom_line(aes(x=time,y=data,color=host), size=1) + # color=host
+  geom_line(aes(x=time,y=median,color=sym), size=1) +
+  geom_ribbon(aes(x=time,ymin=low,ymax=high,fill=sym), alpha=0.2) + 
   # Axis scales and colour scales
   scale_y_continuous(label=numfmt) +
   scale_color_discrete(type=tolvibrant) +
+  scale_fill_discrete(type=tolvibrant) +
   # Plot labels
   labs(title="Humidity",
        x=NULL, y="Percent",
-       subtitle = "In percent for today, 10 minute medians",
+       subtitle = "Today, 10 minute medians and 5th/95th percentiles",
        caption="Source: observatory db",
        color=NULL) +
   # Themeing & fonts
@@ -84,14 +88,16 @@ ggplot(dfr[dfr$sym=='humidity',]) +
 # Air pressure chart
 ggplot(dfr[dfr$sym=='pressure',]) +
   # Data series
-  geom_line(aes(x=time,y=data,color=host), size=1) + # color=host
+  geom_line(aes(x=time,y=median,color=sym), size=1) +
+  geom_ribbon(aes(x=time,ymin=low,ymax=high,fill=sym), alpha=0.2) + 
   # Axis scales and colour scales
   scale_y_continuous(label=numfmt) +
   scale_color_discrete(type=tolvibrant) +
+  scale_fill_discrete(type=tolvibrant) +
   # Plot labels
   labs(title="Air Pressure",
        x=NULL, y="hPa",
-       subtitle = "In hPa for today, 10 minute medians",
+       subtitle = "Today, 10 minute medians and 5th/95th percentiles",
        caption="Source: observatory db",
        color=NULL) +
   # Themeing & fonts
@@ -105,7 +111,8 @@ ggplot(dfr[dfr$sym=='pressure',]) +
 ```{r, echo=FALSE, message=FALSE, warning=FALSE, error=FALSE, fig.width=10, fig.height=6}
 ggplot(dfr[dfr$sym %in% c('cpu','cputemp','mem'),]) +
   # Data series
-  geom_smooth(aes(x=time,y=data,color=sym,fill=sym), se=FALSE, size=1) +
+  geom_line(aes(x=time,y=median,color=sym), size=1) +
+  geom_ribbon(aes(x=time,ymin=low,ymax=high,fill=sym), alpha=0.2) + 
   # Axis scales and colour scales
   scale_y_continuous(label=numfmt)+
   scale_color_discrete(type=tolvibrant) +
