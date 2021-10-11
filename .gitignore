@@ -1,6 +1,7 @@
 tick/db*.*.*
 tick/db/**
 nohup.out
+publish.out
 \#*\#
 .\#*
 *~
