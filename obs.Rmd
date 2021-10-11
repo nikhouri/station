@@ -7,7 +7,7 @@ output:
     fig_height: 4
     toc: TRUE
 ---
-Generated `r Sys.time()`
+Generated `r format(Sys.time(),"%F %T",tz='UTC',usetz=TRUE)`
 
 # Today's Summary
 ```{r, echo=FALSE, message=FALSE, warning=FALSE, error=FALSE, }
@@ -26,7 +26,7 @@ dfn$low <- numfmt(round(dfn$low,1))
 dfn$median <- numfmt(round(dfn$median,1))
 dfn$high <- numfmt(round(dfn$high,1))
 dfn$time = as.POSIXct(dfn$time,format='0D%H:%M:%S',tz='UTC')
-colnames(dfn) <- c("Variable","Units","Timestamp","Last","Min (5th%)","Median","Max (95th%)")
+colnames(dfn) <- c("Variable","Units","Timestamp (UTC)","Last","Min (5th%)","Median","Max (95th%)")
 
 knitr::kable(dfn)
 ```
