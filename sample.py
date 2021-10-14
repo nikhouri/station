@@ -16,7 +16,7 @@ try:
 except ImportError:
     MICSPRESENT = False
 
-LOOPSECS = 30
+LOOPSECS = 10
 TRANSMITSECS = 5
 STASHSAVESECS = 120
 
@@ -44,6 +44,10 @@ def upd(data):
         return -1
 
 if __name__ == '__main__':
+
+    # Temporary - disable MICS as the gas heater is throwing out
+    # our temperature readings
+    MICSPRESENT = False
 
     # Initialise the BME280 & MICS6814 breakouts, disable LEDs
     if BMEPRESENT:

@@ -10,6 +10,7 @@ DELAY = 0 # The chip itself is slow to update
 SPINS = 2
 
 mics = MICS6814()
+mics.set_heater(False)
 mics.set_brightness(1)
 
 for x in range(0,360*SPINS):
