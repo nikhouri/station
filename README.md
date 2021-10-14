@@ -1,5 +1,5 @@
 # Observatory 
-Python & kdb+tick environment logging. Summary is updated every 5 minutes to [https://o.nikhouri.com](https://o.nikhouri.com)
+Python & kdb+tick environment logging.
 
 ![](temperature.png)
 
@@ -18,7 +18,9 @@ time                 host   sym         units| now      lo       median   hi
 0D21:00:23.395481000 rpi    mem         pct  | 55.2     49.2     50.5     58.7    
 ```
 
-# kdb+tick
+# Notes
+
+## kdb+tick
 The kdb+tick deployment is a stock install, barring the addition of a UTC timezone change at the top of all scripts (`tick.q`, `r.q`, and `u.q`). Necessary as the host doesn't run UTC.
 
 ```
@@ -26,10 +28,16 @@ The kdb+tick deployment is a stock install, barring the addition of a UTC timezo
 ```
 None of the scripts are included in the repository, they're all symlinked ag. the standard install location in `~/q` and `~/q/tick`.
 
-# Colour Spin on the MICS chip
-Sometimes WiFi connectivity will drop, and it's tough to see if the weather station is truly dead or just having a bad time connecting. Every hour, the station signals if it's alive or not by flashing a rainbow on the MICS LED.
+## Publishing
 
-The cron job to do this is:
+Summary is updated every 5 minutes to [https://o.nikhouri.com](https://o.nikhouri.com) with a cron job:
+```
+1-59/5 * * * * timeout 1m /home/nik/observatory/publish.sh > /home/nik/observatory/publish.out 2>&1
+
+```
+
+## Colour Spin on the MICS chip
+Sometimes WiFi connectivity will drop, and it's tough to see if the weather station is truly dead or just having a bad time connecting. Every hour, the station signals if it's alive or not by flashing a rainbow on the MICS LED. The cron job to do this is:
 
 ```
 0 * * * * python3 /home/pi/observatory/colourspin.py
