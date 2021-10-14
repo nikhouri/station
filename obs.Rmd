@@ -9,7 +9,6 @@ output:
 ---
 Generated `r format(Sys.time(),"%F %T",tz='UTC',usetz=TRUE)`
 
-# Today's Summary
 ```{r, echo=FALSE, message=FALSE, warning=FALSE, error=FALSE, }
 library(knitr)
 
@@ -18,7 +17,7 @@ numfmt <- function(x) format(x, big.mark="\U00A0", decimal.mark=".", scientific=
 
 # RDB query
 url <- 'http://localhost:5011/.csv?'
-query <- 'pctile:{ y (100 xrank y:asc y) bin x}; select last time, now:last data, low:pctile[5;data], median:med data, high:pctile[95;data] by sym,units from obs where host=`garden'
+query <- 'pctile:{ y (100 xrank y:asc y) bin x}; select last time, now:last data, low:pctile[5;data], median:med data, high:pctile[95;data] by sym,units from obs where host=`garden,sym in `temperature`humidity`pressure'
 uquery <- URLencode(query)
 dfn <- read.csv(paste0(url,uquery),stringsAsFactors=FALSE)
 dfn$now <- numfmt(round(dfn$now,1))
@@ -31,17 +30,27 @@ colnames(dfn) <- c("Variable","Units","Timestamp (UTC)","Last","Min (5th%)","Med
 knitr::kable(dfn)
 ```
 
-# Today's Charts
-
 ```{r, echo=FALSE, message=FALSE, warning=FALSE, error=FALSE, }
 library(ggplot2)
 
 # RDB query
 url <- 'http://localhost:5011/.csv?'
-query <- 'pctile:{ y (100 xrank y:asc y) bin x}; select low:pctile[5;data], median:med data, high:pctile[95;data] by 10 xbar time.minute,sym from obs where host=`garden'
+query <- 'pctile:{ y (100 xrank y:asc y) bin x}; select low:pctile[5;data], median:med data, high:pctile[95;data] by date:.z.d,10 xbar time.minute,sym from obs where host=`garden'
 uquery <- URLencode(query)
-dfr <- read.csv(paste0(url,uquery),stringsAsFactors=FALSE)
-dfr$time = as.POSIXct(dfr$minute,format='%H:%M',tz='UTC')
+today <- read.csv(paste0(url,uquery),stringsAsFactors=FALSE)
+today$time = as.POSIXct(today$minute,format='%H:%M',tz='UTC')
+today$day <- 'today'
+
+# HDB query
+url <- 'http://localhost:5012/.csv?'
+query <- 'pctile:{ y (100 xrank y:asc y) bin x}; select low:pctile[5;data], median:med data, high:pctile[95;data] by date,10 xbar time.minute,sym from obs where host=`garden,date=.z.d-1'
+uquery <- URLencode(query)
+yday <- read.csv(paste0(url,uquery),stringsAsFactors=FALSE)
+yday$time = as.POSIXct(yday$minute,format='%H:%M',tz='UTC')
+yday$day <- 'yesterday'
+
+# Join queries
+dfr <- rbind(today,yday)
 
 # Tol Vibrant colour map
 tolvibrant <- c("#EE3377", "#EE7733", "#0077BB", "#009988", "#33BBEE", "#CC3311", "#BBBBBB")
@@ -49,8 +58,8 @@ tolvibrant <- c("#EE3377", "#EE7733", "#0077BB", "#009988", "#33BBEE", "#CC3311"
 # Temperature chart
 ggplot(dfr[dfr$sym=='temperature',]) +
   # Data series
-  geom_line(aes(x=time,y=median,color=sym), size=1) +
-  geom_ribbon(aes(x=time,ymin=low,ymax=high,fill=sym), alpha=0.2) + 
+  geom_line(aes(x=time,y=median,color=day), size=1) +
+  geom_ribbon(aes(x=time,ymin=low,ymax=high,fill=day), alpha=0.2) + 
   # Axis scales and colour scales
   scale_y_continuous(label=numfmt) +
   scale_color_discrete(type=tolvibrant) +
@@ -58,11 +67,11 @@ ggplot(dfr[dfr$sym=='temperature',]) +
   # Plot labels
   labs(title="Air Temperature",
        x=NULL, y="°C",
-       subtitle = "Today, 10 minute medians and 5th/95th percentiles",
-       color=NULL) +
+       subtitle = "10 minute medians and 5th/95th percentiles",
+       color=NULL,fill=NULL) +
   # Themeing & fonts
   theme_light() +
-  theme(legend.position="hidden",
+  theme(legend.position="top",
         text=element_text(size=15, family="Fira Sans Extra Condensed"),
         plot.title=element_text(family="Fira Sans Extra Condensed Medium"),
         plot.caption=element_text(color="#666666"))
@@ -70,8 +79,8 @@ ggplot(dfr[dfr$sym=='temperature',]) +
 # Humidity chart
 ggplot(dfr[dfr$sym=='humidity',]) +
   # Data series
-  geom_line(aes(x=time,y=median,color=sym), size=1) +
-  geom_ribbon(aes(x=time,ymin=low,ymax=high,fill=sym), alpha=0.2) + 
+  geom_line(aes(x=time,y=median,color=day), size=1) +
+  geom_ribbon(aes(x=time,ymin=low,ymax=high,fill=day), alpha=0.2) + 
   # Axis scales and colour scales
   scale_y_continuous(label=numfmt) +
   scale_color_discrete(type=tolvibrant) +
@@ -79,11 +88,11 @@ ggplot(dfr[dfr$sym=='humidity',]) +
   # Plot labels
   labs(title="Humidity",
        x=NULL, y="Percent",
-       subtitle = "Today, 10 minute medians and 5th/95th percentiles",
-       color=NULL) +
+       subtitle = "10 minute medians and 5th/95th percentiles",
+       color=NULL,fill=NULL) +
   # Themeing & fonts
   theme_light() +
-  theme(legend.position="hidden",
+  theme(legend.position="top",
         text=element_text(size=15, family="Fira Sans Extra Condensed"),
         plot.title=element_text(family="Fira Sans Extra Condensed Medium"),
         plot.caption=element_text(color="#666666"))
@@ -91,8 +100,8 @@ ggplot(dfr[dfr$sym=='humidity',]) +
 # Air pressure chart
 ggplot(dfr[dfr$sym=='pressure',]) +
   # Data series
-  geom_line(aes(x=time,y=median,color=sym), size=1) +
-  geom_ribbon(aes(x=time,ymin=low,ymax=high,fill=sym), alpha=0.2) + 
+  geom_line(aes(x=time,y=median,color=day), size=1) +
+  geom_ribbon(aes(x=time,ymin=low,ymax=high,fill=day), alpha=0.2) + 
   # Axis scales and colour scales
   scale_y_continuous(label=numfmt) +
   scale_color_discrete(type=tolvibrant) +
@@ -100,18 +109,18 @@ ggplot(dfr[dfr$sym=='pressure',]) +
   # Plot labels
   labs(title="Air Pressure",
        x=NULL, y="hPa",
-       subtitle = "Today, 10 minute medians and 5th/95th percentiles",
-       color=NULL) +
+       subtitle = "10 minute medians and 5th/95th percentiles",
+       color=NULL,fill=NULL) +
   # Themeing & fonts
   theme_light() +
-  theme(legend.position="hidden",
+  theme(legend.position="top",
         text=element_text(size=15, family="Fira Sans Extra Condensed"),
         plot.title=element_text(family="Fira Sans Extra Condensed Medium"),
         plot.caption=element_text(color="#666666"))
 ```
 
 ```{r, echo=FALSE, message=FALSE, warning=FALSE, error=FALSE, fig.width=10, fig.height=6}
-ggplot(dfr[dfr$sym %in% c('cpu','cputemp','mem'),]) +
+ggplot(today[today$sym %in% c('cpu','cputemp','mem'),]) +
   # Data series
   geom_line(aes(x=time,y=median,color=sym), size=1) +
   geom_ribbon(aes(x=time,ymin=low,ymax=high,fill=sym), alpha=0.2) + 
