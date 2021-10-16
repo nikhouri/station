@@ -21,16 +21,13 @@ time                 host   sym         units| now      lo       median   hi
 # Notes
 
 ## kdb+tick
-There is a UTC timezone change at the top of all scripts (`tick.q`, `r.q`, and `u.q`), since the tick DB host doesn't run UTC.
 
-```
-\o 0
-```
-None of the scripts are included in the repository, they're all symlinked ag. the standard install location in `~/q` and `~/q/tick`.
+There is a UTC timezone change with `\o 0` at the top of all scripts (`tick.q`, `r.q`, and `u.q`), since the tick DB host doesn't run UTC. None of the scripts are included in the repository, they're all symlinked ag. the standard install location in `~/q` and `~/q/tick`.
 
 ## Publishing
 
 Summary is updated every 5 minutes to [https://o.nikhouri.com](https://o.nikhouri.com) with a cron job:
+
 ```
 1-59/5 * * * * timeout 1m /home/nik/station/publish.sh > /home/nik/station/publish.out 2>&1
 
