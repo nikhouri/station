@@ -1,1 +1,1 @@
-/home/nik/q/tick/u.q
+../../q/tick/u.q
