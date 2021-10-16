@@ -1,6 +1,6 @@
 ---
-title: "Emmer Green Weather Station"
-author: "nik@nikhouri.com"
+title: "Emmer Green Station"
+subtitle: "https://github.com/nikhouri/station"
 output:
   html_document:
     fig_width: 10
@@ -17,15 +17,14 @@ numfmt <- function(x) format(x, big.mark="\U00A0", decimal.mark=".", scientific=
 
 # RDB query
 url <- 'http://localhost:5011/.csv?'
-query <- 'pctile:{ y (100 xrank y:asc y) bin x}; select last time, now:last data, low:pctile[5;data], median:med data, high:pctile[95;data] by sym,units from obs where host=`garden,sym in `temperature`humidity`pressure'
+query <- 'pctile:{ y (100 xrank y:asc y) bin x}; select last time, now:last data, low:pctile[5;data], high:pctile[95;data] by sym,units from obs where host=`garden,sym in `temperature`humidity`pressure'
 uquery <- URLencode(query)
 dfn <- read.csv(paste0(url,uquery),stringsAsFactors=FALSE)
 dfn$now <- numfmt(round(dfn$now,1))
 dfn$low <- numfmt(round(dfn$low,1))
-dfn$median <- numfmt(round(dfn$median,1))
 dfn$high <- numfmt(round(dfn$high,1))
 dfn$time = as.POSIXct(dfn$time,format='0D%H:%M:%S',tz='UTC')
-colnames(dfn) <- c("Variable","Units","Timestamp (UTC)","Last","Min (5th%)","Median","Max (95th%)")
+colnames(dfn) <- c("Variable","Units","Timestamp (UTC)","Last","Min (5th%)","Max (95th%)")
 
 knitr::kable(dfn)
 ```

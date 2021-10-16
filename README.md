@@ -1,4 +1,4 @@
-# Observatory 
+# Station 
 Python & kdb+tick environment logging.
 
 ![](temperature.png)
@@ -21,7 +21,7 @@ time                 host   sym         units| now      lo       median   hi
 # Notes
 
 ## kdb+tick
-The kdb+tick deployment is a stock install, barring the addition of a UTC timezone change at the top of all scripts (`tick.q`, `r.q`, and `u.q`). Necessary as the host doesn't run UTC.
+There is a UTC timezone change at the top of all scripts (`tick.q`, `r.q`, and `u.q`), since the tick DB host doesn't run UTC.
 
 ```
 \o 0
@@ -32,7 +32,7 @@ None of the scripts are included in the repository, they're all symlinked ag. th
 
 Summary is updated every 5 minutes to [https://o.nikhouri.com](https://o.nikhouri.com) with a cron job:
 ```
-1-59/5 * * * * timeout 1m /home/nik/observatory/publish.sh > /home/nik/observatory/publish.out 2>&1
+1-59/5 * * * * timeout 1m /home/nik/station/publish.sh > /home/nik/station/publish.out 2>&1
 
 ```
 
@@ -40,7 +40,7 @@ Summary is updated every 5 minutes to [https://o.nikhouri.com](https://o.nikhour
 Sometimes WiFi connectivity will drop, and it's tough to see if the weather station is truly dead or just having a bad time connecting. Every hour, the station signals if it's alive or not by flashing a rainbow on the MICS LED. The cron job to do this is:
 
 ```
-0 * * * * python3 /home/pi/observatory/colourspin.py
+0 * * * * python3 /home/pi/station/colourspin.py
 ```
 
 # Hardware
@@ -49,4 +49,4 @@ Sometimes WiFi connectivity will drop, and it's tough to see if the weather stat
 * BME280 (Temperature, Humidity, Air Pressure)
 * MICS6814 (Oxidizing Gas, Reducing Gas, Ammonia) 
 
-![](observatory.jpg)
+![](station.jpg)

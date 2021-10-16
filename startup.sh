@@ -1,7 +1,7 @@
 #!/bin/bash
 # From https://how-to.dev/how-to-create-tmux-session-with-a-script
 
-session="observatory_tick"
+session="station-kdb+tick"
 tmux new-session -d -s $session
 
 # Tickerplant
