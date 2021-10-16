@@ -58,8 +58,7 @@ if __name__ == '__main__':
         gas.set_brightness(0.0)
         gas.set_led(0, 0, 0)
 
-    # Load any saved stashed values
-    # TODO
+    # TODO: Load any saved stashed values (ex. after a crash) for transmission
 
     # Loop to keep sampling & sending to the DB
     while True:
@@ -79,10 +78,9 @@ if __name__ == '__main__':
         STASH.append([ts(),'mem',HOST,'pct',psutil.virtual_memory().percent])
         #print(str(STASH[-9:])) # Print our last samples
 
-        # Try to transmit stashed data (and SOME of the last updates -
-        #    so ex. generate 6 every time, try to send 30)
-        # TODO: batch this up
-        # TODO: move to thread? will lock up otherwise while sending
+        # Try to transmit stashed data
+        # TODO: batch this up to send SOME of the last updates -
+        #   so ex. generate 6 every time, try to send 30 to work through backlog
         # TODO: every STASHSAVESECS, persist to disk
         TEMPSTASH = []
         for obs in STASH:
