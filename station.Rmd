@@ -1,6 +1,6 @@
 ---
 title: "Emmer Green Station"
-subtitle: "https://github.com/nikhouri/station"
+author: "https://github.com/nikhouri/station"
 output:
   html_document:
     fig_width: 10
