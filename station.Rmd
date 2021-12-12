@@ -25,10 +25,13 @@ dfn <- read.csv(paste0(url,uquery),stringsAsFactors=FALSE)
 dfn$now <- numfmt(round(dfn$now,1))
 dfn$low <- numfmt(round(dfn$low,1))
 dfn$high <- numfmt(round(dfn$high,1))
-dfn$time = as.POSIXct(dfn$time,format='0D%H:%M:%S',tz='UTC')
+dfn$time <- as.POSIXct(dfn$time,format='0D%H:%M:%S',tz='UTC')
+dfn$sym <- factor(dfn$sym, levels=unique(c('temperature','humidity','pressure', 
+  unique(dfn$sym))), ordered=TRUE)
+dfn <- dfn[order(dfn$sym),] # Sort so we get temp, humidity, pressure on top (if present)
 colnames(dfn) <- c("Variable","Units","Timestamp (UTC)","Last","Min (5th%)","Max (95th%)")
 
-knitr::kable(dfn)
+knitr::kable(dfn,row.names=FALSE)
 ```
 
 ```{r, echo=FALSE, message=FALSE, warning=FALSE, error=FALSE, }
@@ -87,8 +90,20 @@ proper <- function(s) {
 }
 
 symunits <- unique(dfr[,c("sym","units")])
-for (i in 1:nrow(symunits)) {
-  su <- symunits[i,]
+
+# Chart temperature, humidity, pressure if present
+thp <- symunits[symunits$sym %in% c('temperature','humidity','pressure'),]
+thp$sym <- factor(thp$sym, levels=c('temperature','humidity','pressure'), ordered=TRUE)
+thp <- thp[order(thp$sym),]
+for (i in 1:nrow(thp)) {
+  su <- thp[i,]
+  print(drawchart(df=dfr, sym=su$sym, title=proper(su$sym), units=su$units))
+}
+
+# Chart everything else
+ee <- symunits[!(symunits$sym %in% c('temperature','humidity','pressure')),]
+for (i in 1:nrow(ee)) {
+  su <- ee[i,]
   print(drawchart(df=dfr, sym=su$sym, title=proper(su$sym), units=su$units))
 }
 ```
