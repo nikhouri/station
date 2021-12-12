@@ -1,1 +1,2 @@
-../../q/tick/u.q
+\o 0
+\l ../q/tick/u.q
