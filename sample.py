@@ -47,7 +47,7 @@ if __name__ == '__main__':
 
     # Temporary - disable MICS as the gas heater is throwing out
     # our temperature readings
-    MICSPRESENT = False
+    MICSPRESENT = True
 
     # Initialise the BME280 & MICS6814 breakouts, disable LEDs
     if BMEPRESENT:
