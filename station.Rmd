@@ -10,6 +10,7 @@ output:
 Generated `r format(Sys.time(),"%F %T",tz='UTC',usetz=TRUE)`
 
 ```{r, echo=FALSE, message=FALSE, warning=FALSE, error=FALSE, }
+## Table of figures
 library(knitr)
 
 # Number format function
@@ -17,7 +18,8 @@ numfmt <- function(x) format(x, big.mark="\U00A0", decimal.mark=".", scientific=
 
 # RDB query
 url <- 'http://localhost:5011/.csv?'
-query <- 'pctile:{ y (100 xrank y:asc y) bin x}; select last time, now:last data, low:pctile[5;data], high:pctile[95;data] by sym,units from obs where host=`garden,sym in `temperature`humidity`pressure'
+query <- 'select last time, now:last data, low:pctile[5;data], high:pctile[95;data] by sym,units
+  from obs where host=`garden,not sym in `cpu`cputemp`mem'
 uquery <- URLencode(query)
 dfn <- read.csv(paste0(url,uquery),stringsAsFactors=FALSE)
 dfn$now <- numfmt(round(dfn$now,1))
@@ -34,7 +36,7 @@ library(ggplot2)
 
 # RDB query
 url <- 'http://localhost:5011/.csv?'
-query <- 'pctile:{ y (100 xrank y:asc y) bin x}; select low:pctile[5;data], median:med data, high:pctile[95;data] by date:.z.d,10 xbar time.minute,sym from obs where host=`garden'
+query <- 'select low:pctile[5;data], median:med data, high:pctile[95;data] by date:.z.d,10 xbar time.minute,sym,units from obs where host=`garden,not sym in `cpu`cputemp`mem'
 uquery <- URLencode(query)
 today <- read.csv(paste0(url,uquery),stringsAsFactors=FALSE)
 today$time = as.POSIXct(today$minute,format='%H:%M',tz='UTC')
@@ -42,87 +44,65 @@ today$day <- 'today'
 
 # HDB query
 url <- 'http://localhost:5012/.csv?'
-query <- 'pctile:{ y (100 xrank y:asc y) bin x}; select low:pctile[5;data], median:med data, high:pctile[95;data] by date,10 xbar time.minute,sym from obs where host=`garden,date=.z.d-1'
+query <- 'select low:pctile[5;data], median:med data, high:pctile[95;data] by date,10 xbar time.minute,sym,units from obs where host=`garden,not sym in `cpu`cputemp`mem,date=.z.d-1'
 uquery <- URLencode(query)
 yday <- read.csv(paste0(url,uquery),stringsAsFactors=FALSE)
 yday$time = as.POSIXct(yday$minute,format='%H:%M',tz='UTC')
 yday$day <- 'yesterday'
 
-# Join queries
+# Join queries - normally implemented in a gateway
 dfr <- rbind(today,yday)
 
 # Tol Vibrant colour map
 tolvibrant <- c("#EE3377", "#EE7733", "#0077BB", "#009988", "#33BBEE", "#CC3311", "#BBBBBB")
 
-# Temperature chart
-ggplot(dfr[dfr$sym=='temperature',]) +
-  # Data series
-  geom_line(aes(x=time,y=median,color=day), size=1) +
-  geom_ribbon(aes(x=time,ymin=low,ymax=high,fill=day), alpha=0.2) + 
-  # Axis scales and colour scales
-  scale_x_datetime(date_labels = "%H:%M") +
-  scale_y_continuous(label=numfmt) +
-  scale_color_discrete(type=tolvibrant) +
-  scale_fill_discrete(type=tolvibrant) +
-  # Plot labels
-  labs(title="Air Temperature",
-       x=NULL, y="°C",
-       subtitle = "10 minute medians and 5th/95th percentiles",
-       color=NULL,fill=NULL) +
-  # Themeing & fonts
-  theme_light() +
-  theme(legend.position="top",
-        text=element_text(size=15, family="Fira Sans Extra Condensed"),
-        plot.title=element_text(family="Fira Sans Extra Condensed Medium"),
-        plot.caption=element_text(color="#666666"))
+drawchart <- function(df, sym, title="Data series", units="Units") {
+  # ggplot2 chart
+  ggp <- ggplot(df[df$sym==sym,]) +
+    # Data series
+    geom_line(aes(x=time,y=median,color=day), size=1) +
+    geom_ribbon(aes(x=time,ymin=low,ymax=high,fill=day), alpha=0.2) + 
+    # Axis scales and colour scales
+    scale_x_datetime(date_labels = "%H:%M") +
+    scale_y_continuous(label=numfmt) +
+    scale_color_discrete(type=tolvibrant) +
+    scale_fill_discrete(type=tolvibrant) +
+    # Plot labels
+    labs(title=title,
+         x=NULL, y=units,
+         subtitle = "10 minute medians and 5th/95th percentiles",
+         color=NULL,fill=NULL) +
+    # Themeing & fonts
+    theme_light() +
+    theme(legend.position="top",
+          text=element_text(size=15, family="Fira Sans Extra Condensed"),
+          plot.title=element_text(family="Fira Sans Extra Condensed Medium"),
+          plot.caption=element_text(color="#666666"))
+  return(ggp)
+}
 
-# Humidity chart
-ggplot(dfr[dfr$sym=='humidity',]) +
-  # Data series
-  geom_line(aes(x=time,y=median,color=day), size=1) +
-  geom_ribbon(aes(x=time,ymin=low,ymax=high,fill=day), alpha=0.2) + 
-  # Axis scales and colour scales
-  scale_x_datetime(date_labels = "%H:%M") +
-  scale_y_continuous(label=numfmt) +
-  scale_color_discrete(type=tolvibrant) +
-  scale_fill_discrete(type=tolvibrant) +
-  # Plot labels
-  labs(title="Humidity",
-       x=NULL, y="Percent",
-       subtitle = "10 minute medians and 5th/95th percentiles",
-       color=NULL,fill=NULL) +
-  # Themeing & fonts
-  theme_light() +
-  theme(legend.position="top",
-        text=element_text(size=15, family="Fira Sans Extra Condensed"),
-        plot.title=element_text(family="Fira Sans Extra Condensed Medium"),
-        plot.caption=element_text(color="#666666"))
+proper <- function(s) {
+  # Capitilize first leter
+  sub("(.)", ("\\U\\1"), tolower(s), pe=TRUE)
+}
 
-# Air pressure chart
-ggplot(dfr[dfr$sym=='pressure',]) +
-  # Data series
-  geom_line(aes(x=time,y=median,color=day), size=1) +
-  geom_ribbon(aes(x=time,ymin=low,ymax=high,fill=day), alpha=0.2) + 
-  # Axis scales and colour scales
-  scale_x_datetime(date_labels = "%H:%M") +
-  scale_y_continuous(label=numfmt) +
-  scale_color_discrete(type=tolvibrant) +
-  scale_fill_discrete(type=tolvibrant) +
-  # Plot labels
-  labs(title="Air Pressure",
-       x=NULL, y="hPa",
-       subtitle = "10 minute medians and 5th/95th percentiles",
-       color=NULL,fill=NULL) +
-  # Themeing & fonts
-  theme_light() +
-  theme(legend.position="top",
-        text=element_text(size=15, family="Fira Sans Extra Condensed"),
-        plot.title=element_text(family="Fira Sans Extra Condensed Medium"),
-        plot.caption=element_text(color="#666666"))
+symunits <- unique(dfr[,c("sym","units")])
+for (i in 1:nrow(symunits)) {
+  su <- symunits[i,]
+  print(drawchart(df=dfr, sym=su$sym, title=proper(su$sym), units=su$units))
+}
 ```
 
 ```{r, echo=FALSE, message=FALSE, warning=FALSE, error=FALSE, fig.width=10, fig.height=6}
-ggplot(today[today$sym %in% c('cpu','cputemp','mem'),]) +
+# RDB query
+url <- 'http://localhost:5011/.csv?'
+query <- 'select low:pctile[5;data], median:med data, high:pctile[95;data] by date:.z.d,10 xbar time.minute,sym,units from obs where host=`garden,sym in `cpu`cputemp`mem'
+uquery <- URLencode(query)
+dia <- read.csv(paste0(url,uquery),stringsAsFactors=FALSE)
+dia$time = as.POSIXct(dia$minute,format='%H:%M',tz='UTC')
+dia$day <- 'today'
+
+ggplot(dia[dia$sym %in% c('cpu','cputemp','mem'),]) +
   # Data series
   geom_line(aes(x=time,y=median,color=sym), size=1) +
   geom_ribbon(aes(x=time,ymin=low,ymax=high,fill=sym), alpha=0.2) + 
