@@ -54,8 +54,7 @@ if (nrow(yday) > 0) {
   yday$time = as.POSIXct(yday$minute,format='%H:%M',tz='UTC')
   yday$day <- 'yesterday'
   dfr <- rbind(today,yday) # Join queries - normally implemented in a gateway
-}
-else {
+} else {
   dfr <- today
 }
 
