@@ -55,6 +55,9 @@ if (nrow(yday) > 0) {
   yday$day <- 'yesterday'
   dfr <- rbind(today,yday) # Join queries - normally implemented in a gateway
 }
+else {
+  dfr <- today
+}
 
 # Tol Vibrant colour map
 tolvibrant <- c("#EE3377", "#EE7733", "#0077BB", "#009988", "#33BBEE", "#CC3311", "#BBBBBB")
