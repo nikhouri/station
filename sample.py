@@ -22,7 +22,7 @@ STASHSAVESECS = 120
 
 HOST = socket.gethostname()
 PROTO = 'http://'
-DBHOST = '192.168.0.12'
+DBHOST = 'nikhouri.com'
 PORT = ':5010'
 PATH = '/?'
 

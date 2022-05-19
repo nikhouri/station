@@ -50,11 +50,11 @@ url <- 'http://localhost:5012/.csv?'
 query <- 'select low:pctile[5;data], median:med data, high:pctile[95;data] by date,10 xbar time.minute,sym,units from obs where host=`garden,not sym in `cpu`cputemp`mem,date=.z.d-1'
 uquery <- URLencode(query)
 yday <- read.csv(paste0(url,uquery),stringsAsFactors=FALSE)
-yday$time = as.POSIXct(yday$minute,format='%H:%M',tz='UTC')
-yday$day <- 'yesterday'
-
-# Join queries - normally implemented in a gateway
-dfr <- rbind(today,yday)
+if (nrow(yday) > 0) {
+  yday$time = as.POSIXct(yday$minute,format='%H:%M',tz='UTC')
+  yday$day <- 'yesterday'
+  dfr <- rbind(today,yday) # Join queries - normally implemented in a gateway
+}
 
 # Tol Vibrant colour map
 tolvibrant <- c("#EE3377", "#EE7733", "#0077BB", "#009988", "#33BBEE", "#CC3311", "#BBBBBB")
